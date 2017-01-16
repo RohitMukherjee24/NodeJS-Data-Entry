@@ -1,0 +1,169 @@
+<html ng-app= "emp">
+<head>
+  <title>Employee Directory Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Abel|Open+Sans:400,600" rel="stylesheet" />
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <link rel="shortcut icon" href="http://d30aa6afk7qd1v.cloudfront.net/imgver.5694333/img/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <br><br><br><br><br><br><br><br><br>
+  <div class="container" ng-controller="AppCtrl">
+    <div class='container-fluid'>
+      <h1 align="center">Employee Directory App</h1><br/><br/>
+
+
+      <table class="table">          
+        <thead>
+          <tr>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Date of Birth</td>
+            <td>Department</td>
+            <td>Gender</td>
+            <td>Age</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <form>
+              <td>
+               <input class='empform' ng-model="employee.name" required placeholder="Name"/>
+             </td>
+             <td>
+               <input type='email' class="empform" ng-model="employee.email" required placeholder="email"/>
+             </td>
+             <td>
+              <input calendar ng-model='employee.date' max-date="0" required placeholder="yy-mm-dd" />
+            </td>
+            <td>
+             <input ng-model="employee.dep" required class="empform" placeholder="Department"/>
+           </td>
+
+           <td>
+             <input ng-model="employee.gender" required class="empform" placeholder="Male/Female"/>
+           </td>
+           <td>
+             <input something type="number" ng-model="calculateAge(employee.date)" disabled="" class="empform" placeholder="Age">
+           </td>
+           <td>
+            <button class="btn btn-success btn-md" ng-click="addEmployee()">Add Employee</button>
+            <td><button class="btn btn-success btn-md" ng-click="updateEmployee()">Update Employee</button></td>
+          </td>
+        </form>
+      </tr>
+      <tr ng-repeat="employee in employees">
+        <td>{{employee.name}}</td>
+        <td>{{employee.email}}</td>               
+        <td>{{employee.date}}</td>
+        <td>{{employee.dep}}</td>
+        <td>{{employee.gender}}</td>
+        <td>{{calculateAge(employee.date)}}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" ng-click="delEmployee(employee._id)">Delete</button>&nbsp;&nbsp;
+          <button class="btn btn-primary btn-sm" ng-click="editEmployee(employee._id)">Edit</button>
+        </td>
+
+      </tr> 
+    </tbody>
+    <nav class='navbar navbar-inverse navbar-fixed-top'>
+
+      <div class='navbar-header'>
+
+      </div>
+    </div>
+
+    <script>
+      var emp = angular.module('emp', []);
+      emp.controller('AppCtrl', ['$scope', '$http', function($scope, $http){
+
+        $scope.calculateAge = function calculateAge(birthday) { // birthday is a string
+    var ageDifMs = Date.now() - new Date(birthday).getTime(); // parse string to date
+    var ageDate = new Date(ageDifMs); // miliseconds from epoch
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  }
+
+  var list = function(){
+   $http.get('/employee').success(function(response){
+     $scope.employees=response;
+     $scope.employee="";
+   });
+ };
+
+ list();
+
+
+ $scope.addEmployee = function() {
+
+  $http.post('/employee', $scope.employee).success(function (response) {
+
+  })
+  list();  
+};
+
+$scope.getEmployee = function() {
+
+  $http.get('/employee').success(function (response) {
+   $scope.data = response;
+ })
+
+};
+
+$scope.delEmployee = function(id) {
+
+  $http.delete('/employee/'+id).success(function (response) {
+
+  })
+  list();
+
+};
+
+$scope.editEmployee = function(id) {
+
+  $http.get('/employee/'+id).success(function(response){
+   $scope.employee = response[0];
+ });
+};
+
+$scope.updateEmployee = function(id) {
+
+  $http.put('/employee/'+$scope.employee._id, $scope.employee).success(function(response){
+
+  });
+  list();
+};
+
+}]),
+
+      emp.directive('calendar', function () {
+        return {
+          require: 'ngModel',
+          link: function (scope, el, attr, ngModel) {
+            $(el).datepicker({
+              dateFormat: 'yy-mm-dd',
+              ignoreReadonly: true,
+              maxDate: 'now',
+              onSelect: function (dateText) {
+                scope.$apply(function () {
+                  ngModel.$setViewValue(dateText);
+                });
+              }
+            });
+          }
+        };
+      })
+
+      function AppCtrl($scope) {
+    //$scope.name = 'Superhero';
+  };
+
+</script>
+
+</body>
+
+</html>
